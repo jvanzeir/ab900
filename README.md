@@ -10,6 +10,18 @@ This hands-on course provides IT professionals and administrators with the knowl
 
 **Duration:** 4 segments × 50 minutes each
 
+**Certification Path:** This course prepares you for the **Microsoft AB-900: Copilot and Agent Administration Fundamentals** certification exam (currently in beta).
+
+### About the AB-900 Certification
+
+- **Official Title:** Microsoft 365 Certified: Copilot and Agent Administration Fundamentals
+- **Status:** Beta (as of January 2025)
+- **Duration:** 45 minutes
+- **Passing Score:** 700
+- **Exam Page:** https://learn.microsoft.com/en-us/credentials/certifications/exams/ab-900/
+
+See the [Complete AB-900 Exam Guide](./shared-resources/references/AB-900-EXAM-GUIDE.md) for comprehensive preparation resources.
+
 ## Course Segments
 
 ### [Segment 1: Core Features and Objects of Microsoft 365 Services](./segment-01-core-m365-services/)
