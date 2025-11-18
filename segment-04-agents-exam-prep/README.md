@@ -155,9 +155,19 @@ By the end of this segment, you will be able to:
 ### 6. Exam AB-900 Preparation (3 minutes)
 
 #### About Microsoft AB-900
-- **Note:** AB-900 is a hypothetical exam code for this course. For actual Microsoft certifications related to Copilot and AI, check:
+- **Official Title:** Microsoft 365 Certified: Copilot and Agent Administration Fundamentals
+- **Exam Code:** AB-900
+- **Status:** Beta (as of January 2025)
+- **Duration:** 45 minutes
+- **Passing Score:** 700
+- **Exam Page:** https://learn.microsoft.com/credentials/certifications/exams/ab-900/
+- **Study Guide:** https://learn.microsoft.com/credentials/certifications/resources/study-guides/ab-900
+
+#### Related Certifications
   - MS-900: Microsoft 365 Fundamentals
   - MS-102: Microsoft 365 Administrator
+  - SC-300: Microsoft Identity and Access Administrator
+  - SC-400: Microsoft Information Protection Administrator
   - AI-900: Microsoft Azure AI Fundamentals
   - PL-200: Power Platform Functional Consultant
 
