@@ -4283,3 +4283,1809 @@ Copilot: "Based on the Q3 Financial Report.xlsx..."
 
 ---
 
+
+### Skill: Understand how Microsoft Graph influences Copilot responses
+
+**What You Need to Know:**
+- Microsoft Graph is the API layer Copilot uses
+- Graph returns data based on permissions
+- Understanding Graph helps troubleshoot Copilot
+
+**Key Concepts:**
+
+#### Microsoft Graph Role in Copilot
+
+**What Graph Does:**
+1. **Unified API:** Single endpoint for all M365 data
+2. **Permission Enforcement:** Checks user permissions before returning data
+3. **Data Aggregation:** Combines data from multiple sources
+4. **Intelligence:** Provides insights (relevance, relationships, trends)
+
+**Copilot's Graph Usage:**
+```
+User Prompt: "What's my schedule today?"
+    ↓
+Copilot calls Microsoft Graph
+    ↓
+Graph API: GET /me/calendar/calendarView
+    ↓
+Permission check: Can user read their own calendar? YES
+    ↓
+Returns: Calendar events
+    ↓
+Copilot formats response: "You have 3 meetings today..."
+```
+
+#### Graph Data That Influences Responses
+
+**People Data:**
+- Colleagues, reporting structure
+- Contact information
+- Collaboration patterns
+- **Influence:** "Who should I invite?" → Graph suggests frequent collaborators
+
+**Files and Content:**
+- Recent files, frequently accessed
+- Files shared with user
+- Content within files (if indexed)
+- **Influence:** "Show me recent project docs" → Graph returns based on recency + relevance
+
+**Communication:**
+- Email threads, Teams chats
+- Meeting transcripts
+- Channel conversations
+- **Influence:** "What did we decide in the meeting?" → Graph retrieves transcript
+
+**Tasks and Planning:**
+- Planner tasks, To Do items
+- Deadlines, assignments
+- **Influence:** "What's on my to-do list?" → Graph returns tasks
+
+**Insights:**
+- Working hours patterns
+- Collaboration network
+- Time analytics
+- **Influence:** "When is best time to meet?" → Graph suggests based on habits
+
+#### Graph Permissions Model
+
+**Permission Types:**
+
+**Delegated Permissions:**
+- Act on behalf of signed-in user
+- Copilot uses these
+- Respects user's access rights
+- Examples:
+  - `Calendars.Read` - Read user's calendar
+  - `Files.Read.All` - Read user's accessible files
+  - `Mail.Read` - Read user's email
+
+**Application Permissions:**
+- Act as the application itself
+- No user context
+- NOT used by Copilot (except backend processes)
+- Requires admin consent
+
+**Permission Scopes:**
+- `User.Read` - Read basic user profile
+- `Mail.ReadWrite` - Read and send email
+- `Files.ReadWrite.All` - Full file access
+- `Sites.Read.All` - Read all SharePoint sites user can access
+
+#### How Graph Enhances Copilot
+
+**1. Contextual Awareness**
+- Graph knows user's context (current task, recent activity)
+- Copilot leverages for relevant suggestions
+- Example: Working in Excel about sales → Suggests sales-related files
+
+**2. Relationship Mapping**
+- Graph tracks relationships between data
+- Document → Author, Related docs, Referenced in emails
+- Copilot uses to provide comprehensive answers
+
+**3. Relevance Scoring**
+- Graph ranks results by relevance
+- Based on: Recency, frequency, user's role, collaboration
+- Copilot presents most relevant first
+
+**4. Proactive Insights**
+- Graph identifies patterns
+- Copilot surfaces: "You have a meeting in 10 minutes"
+- Upcoming deadlines, action items
+
+#### Graph API Examples Used by Copilot
+
+**Get User's Calendar:**
+```
+GET https://graph.microsoft.com/v1.0/me/calendar/calendarView
+```
+**Response:** User's calendar events
+
+**Search for Files:**
+```
+GET https://graph.microsoft.com/v1.0/me/drive/search(q='budget')
+```
+**Response:** Files matching "budget" user can access
+
+**Get Team Members:**
+```
+GET https://graph.microsoft.com/v1.0/groups/{team-id}/members
+```
+**Response:** Team members (if user is member)
+
+**Get Recent Files:**
+```
+GET https://graph.microsoft.com/v1.0/me/drive/recent
+```
+**Response:** Recently accessed files
+
+#### Graph Limitations Affecting Copilot
+
+**Permission Boundaries:**
+- If Graph denies access → Copilot can't retrieve
+- Example: User not in Finance team → Graph won't return Finance files → Copilot says "No access"
+
+**Indexing Lag:**
+- Newly created content may not be immediately available
+- Graph index updates: Minutes to hours
+- Copilot might not find brand-new file
+
+**Data Scope:**
+- Graph only accesses M365 data
+- Not external systems (unless connected via connectors)
+- Copilot limited to Graph's data sources
+
+**Rate Limiting:**
+- Graph has throttling limits
+- Excessive requests can be throttled
+- Rare but possible under heavy load
+
+#### Troubleshooting with Graph Understanding
+
+**Issue: Copilot says "No access to that file"**
+- **Graph check:** Does user have permissions on file?
+- **Solution:** Grant access in SharePoint
+
+**Issue: Copilot doesn't find recent document**
+- **Graph check:** Has Graph indexed it yet?
+- **Solution:** Wait or search by exact name
+
+**Issue: Copilot shows incomplete team list**
+- **Graph check:** Is user actually member of team?
+- **Solution:** Add user to team
+
+**Hands-On (Conceptual):**
+1. Understand Graph is the data layer
+2. When Copilot can't access something:
+   - Think: What Graph permission is needed?
+   - Check user's actual permissions
+3. Graph Explorer (for admins/devs): https://developer.microsoft.com/en-us/graph/graph-explorer
+   - Test Graph queries
+   - See what user can access
+   - Troubleshoot permission issues
+
+**Key Takeaways:**
+- Graph = Copilot's eyes into M365 data
+- Permission enforcement at Graph level
+- Graph returns only what user can access
+- Understanding Graph helps troubleshoot Copilot issues
+
+**Documentation:** https://learn.microsoft.com/en-us/graph/overview
+
+---
+
+### Skill: Understand how Copilot uses permissions and other controls in Microsoft 365, Microsoft Purview, and Microsoft Defender to protect against risks
+
+**What You Need to Know:**
+- Copilot integrates with existing security controls
+- No separate security model for Copilot
+- Layered protection approach
+
+**Key Concepts:**
+
+#### Copilot Security Integration
+
+**Philosophy:** Copilot is NOT a separate system - it's integrated into M365
+
+**Existing controls automatically apply to Copilot:**
+- Sensitivity labels
+- DLP policies
+- Conditional Access
+- Information barriers
+- Privileged Access Management
+- Microsoft Defender protections
+
+#### Microsoft 365 Permission Controls
+
+**Sensitivity Labels:**
+- **What they do:** Encrypt and restrict access to files
+- **How Copilot respects them:**
+  - Cannot access encrypted file if user lacks decryption rights
+  - Won't surface content from labeled files to unauthorized users
+  - Labels applied to Copilot-generated content inherit from source
+
+**Example:**
+```
+File: "Executive Compensation.xlsx"
+Label: "Highly Confidential - Exec Only"
+Encryption: Only Executives can open
+
+User (non-exec) asks Copilot: "What are executive salaries?"
+Copilot: "I don't have access to that information"
+```
+
+**SharePoint Permissions:**
+- Copilot respects site membership, unique permissions
+- User not in site → Copilot can't access site content
+
+**Conditional Access:**
+- Policies apply to Copilot access
+- Example:
+  - Policy: "Require compliant device for Copilot"
+  - Non-compliant device → Blocked from Copilot
+
+**Information Barriers:**
+- Prevent communication between segments (e.g., Trading and Research)
+- Copilot enforces barriers:
+  - Trading user asks about Research files → Blocked
+  - Cannot cross barrier boundaries
+
+#### Microsoft Purview Controls
+
+**Data Loss Prevention (DLP):**
+- **Copilot integration:**
+  - Scans Copilot prompts for sensitive data
+  - Scans Copilot responses before showing user
+  - Blocks responses containing policy violations
+  - Shows policy tip to user
+
+**Example:**
+```
+User prompt: "Draft email with customer list to external partner"
+DLP detects: Customer emails (SIT: Email addresses)
+Policy: Block external sharing of customer data
+Result: Copilot blocks, shows policy tip
+```
+
+**DLP Policy Configuration for Copilot:**
+- Locations: Include "Copilot for Microsoft 365"
+- Conditions: Sensitive info types, labels
+- Actions: Block, notify user, send incident report
+
+**Insider Risk Management:**
+- Detects risky Copilot usage:
+  - Excessive prompts requesting sensitive data
+  - Attempts to access restricted content
+  - Bulk data extraction via Copilot
+- Alerts admins to investigate
+- Can trigger Adaptive DLP (stricter controls)
+
+**Communication Compliance:**
+- Monitors Copilot-generated messages
+- Scans for inappropriate content
+- Examples:
+  - User asks Copilot to draft harassing email
+  - System flags for review
+
+**Audit Logging:**
+- All Copilot interactions logged
+- **Unified Audit Log** captures:
+  - Copilot prompts (summary)
+  - Data sources accessed
+  - Actions taken (file created, email sent)
+  - Timestamp, user
+- Retention: 90 days default, up to 1 year (E5)
+- Use for: Investigations, compliance, usage tracking
+
+**eDiscovery:**
+- Copilot content subject to eDiscovery
+- Legal hold preserves Copilot-generated docs
+- Search includes Copilot interactions
+
+#### Microsoft Defender Protections
+
+**Defender for Office 365:**
+- **Safe Links:** Scans URLs in Copilot responses
+- **Safe Attachments:** Scans Copilot-generated files
+- **Anti-phishing:** Detects if Copilot-crafted email is phishing-like (rare, but monitored)
+
+**Defender for Endpoint:**
+- If Copilot triggers download/file operation
+- Defender scans for malware
+- Blocks malicious content
+
+**Defender for Cloud Apps:**
+- Monitors Copilot as a cloud app
+- Detects anomalies:
+  - Unusual Copilot usage patterns
+  - Access from risky locations
+  - Potential data exfiltration via Copilot
+
+**Example:**
+- User in Russia (unusual location) uses Copilot to access 100 files rapidly
+- Defender for Cloud Apps flags as anomaly
+- Admin investigates possible compromise
+
+#### Layered Protection Model
+
+**Layer 1: Identity (Entra ID)**
+- Conditional Access: Device, location, risk
+- MFA: Required for Copilot access (if policy enforces)
+- PIM: Just-in-time admin access
+
+**Layer 2: Permissions (M365)**
+- SharePoint/OneDrive permissions
+- Mailbox access rights
+- Team memberships
+
+**Layer 3: Data Protection (Purview)**
+- Sensitivity labels: Encryption, access control
+- DLP: Prevent data leakage
+- Retention: Preserve Copilot content
+
+**Layer 4: Threat Protection (Defender)**
+- Detect malicious activity
+- Block unsafe links/attachments
+- Monitor for anomalies
+
+**Layer 5: Governance (Purview)**
+- Audit: Track all actions
+- eDiscovery: Legal compliance
+- Communication Compliance: Content monitoring
+
+#### Risk Protection Scenarios
+
+**Scenario 1: Prevent Accidental Data Exposure**
+
+**Risk:** User asks Copilot to summarize sensitive file and share externally
+
+**Controls:**
+1. Sensitivity label on file: Blocks external sharing
+2. DLP policy: Detects sharing attempt
+3. Action: Copilot blocks, shows policy tip
+4. Audit: Logs blocked action
+
+**Scenario 2: Insider Threat Detection**
+
+**Risk:** Departing employee uses Copilot to extract company data
+
+**Controls:**
+1. Insider Risk Management: Detects unusual Copilot usage
+2. Adaptive DLP: Applies stricter controls to high-risk user
+3. Blocks: Data downloads, large document access
+4. Alerts: Security team investigates
+
+**Scenario 3: Compliance Violation**
+
+**Risk:** User asks Copilot to draft message violating harassment policy
+
+**Controls:**
+1. Communication Compliance: Scans draft
+2. Detects: Inappropriate language
+3. Flags: For compliance review
+4. Admin: Reviews, takes action (coaching, discipline)
+
+**Scenario 4: Compromised Account**
+
+**Risk:** Attacker uses stolen credentials to access Copilot
+
+**Controls:**
+1. Conditional Access: Detects sign-in from unusual location
+2. Blocks: Access until MFA completed
+3. Identity Protection: Flags risky sign-in
+4. Defender: Monitors for anomalous Copilot usage
+5. Admin: Receives alert, investigates
+
+#### Admin Controls for Copilot
+
+**Copilot-Specific Settings:**
+- **Enable/Disable Copilot:** Tenant-wide or per-user
+- **Web grounding:** Allow Copilot to reference public internet
+- **Plugins:** Control which plugins users can add
+- **Data sharing:** Optional connected experiences
+
+**Location:** Microsoft 365 Admin Center → Copilot
+
+**Monitoring:**
+- **Copilot Dashboard:** Usage, adoption metrics
+- **Audit logs:** Search for Copilot activities
+- **DLP reports:** Copilot policy violations
+- **Insider Risk:** Copilot-related alerts
+
+#### Best Practices
+
+**Before Copilot Deployment:**
+1. **Audit permissions:** Fix oversharing in SharePoint
+2. **Apply labels:** Classify sensitive data
+3. **Configure DLP:** Protect sensitive info types
+4. **Enable auditing:** Ensure logs capturing Copilot
+5. **Train users:** Responsible Copilot use
+
+**During Copilot Use:**
+1. **Monitor:** Review Copilot Dashboard regularly
+2. **Investigate:** DLP alerts involving Copilot
+3. **Adjust:** Policies based on usage patterns
+4. **Communicate:** Policy updates to users
+
+**Continuous Improvement:**
+1. **Review:** Audit logs for Copilot misuse
+2. **Refine:** DLP policies (reduce false positives)
+3. **Update:** Sensitivity labels as needed
+4. **Train:** Users on policy violations
+
+**Hands-On:**
+1. Verify controls apply to Copilot:
+   - Create DLP policy
+   - Include location: "Copilot for Microsoft 365"
+   - Test: Ask Copilot to share sensitive data
+   - Verify: DLP blocks
+
+2. Check audit logs:
+   - Purview → Audit
+   - Search for: Activity "CopilotInteraction"
+   - Review: What data accessed
+
+3. Test label respect:
+   - Apply "Confidential" label with encryption to file
+   - Ask Copilot about file (as unauthorized user)
+   - Verify: Copilot can't access
+
+**Key Takeaways:**
+- Copilot = Subject to ALL existing controls
+- No separate Copilot security model needed
+- Layered protection (identity, permissions, data, threat, governance)
+- Prepare environment BEFORE Copilot deployment
+- Monitor continuously
+
+**Documentation:** https://learn.microsoft.com/en-us/copilot/microsoft-365/microsoft-365-copilot-security
+
+---
+
+### Skill: Understand responsible AI principles
+
+**What You Need to Know:**
+- Microsoft's AI development guided by ethical principles
+- Responsible AI built into Copilot design
+- Users and admins share responsibility
+
+**Key Concepts:**
+
+#### Microsoft's Responsible AI Principles
+
+**1. Fairness**
+- **Principle:** AI should treat all people fairly
+- **In Copilot:**
+  - Trained on diverse datasets
+  - Tested for bias
+  - Doesn't discriminate based on protected characteristics
+- **Example:** Copilot suggests candidates for job based on qualifications, not demographics
+
+**2. Reliability and Safety**
+- **Principle:** AI should perform reliably and safely
+- **In Copilot:**
+  - Extensive testing before release
+  - Continuous monitoring
+  - Fail-safes to prevent harmful outputs
+  - Human oversight for critical decisions
+- **Example:** Copilot won't execute financial transactions without confirmation
+
+**3. Privacy and Security**
+- **Principle:** AI should respect privacy and be secure
+- **In Copilot:**
+  - Data not used to train foundation models
+  - Tenant data isolation
+  - Respects existing permissions and labels
+  - No data shared across tenants
+- **Example:** Your Copilot prompts don't train models for other organizations
+
+**4. Inclusiveness**
+- **Principle:** AI should empower everyone and engage people
+- **In Copilot:**
+  - Accessible to users with disabilities
+  - Multiple languages supported
+  - Assistive technology compatible
+  - Reduces barriers to productivity
+- **Example:** Screen reader support for vision-impaired users
+
+**5. Transparency**
+- **Principle:** AI should be understandable
+- **In Copilot:**
+  - Users know they're interacting with AI
+  - Cites sources for information
+  - Explains limitations
+  - Clear about when it doesn't know
+- **Example:** Copilot shows "Based on X document" with link
+
+**6. Accountability**
+- **Principle:** People should be accountable for AI systems
+- **In Copilot:**
+  - Humans make final decisions
+  - Audit trails of AI actions
+  - Feedback mechanisms
+  - Microsoft accountable for AI behavior
+- **Example:** User reviews Copilot draft before sending email
+
+#### Responsible AI in Practice
+
+**Data Privacy:**
+- **Your data stays yours:**
+  - Prompts and responses remain in your tenant
+  - Not used to improve base models
+  - Not shared with other customers
+  - Not accessible to Microsoft employees (without legal basis)
+
+**Transparency Features:**
+- **Copilot identifies itself:** Users know it's AI
+- **Source attribution:** Links to documents used
+- **Confidence indicators:** "I'm not sure" when uncertain
+- **Limitations stated:** "I can only access data you have permission to see"
+
+**Human Oversight:**
+- **User in control:**
+  - Review before accepting suggestions
+  - Edit Copilot outputs
+  - Provide feedback (thumbs up/down)
+  - Final decision always with human
+
+**Content Filtering:**
+- **Harmful content blocked:**
+  - Hate speech
+  - Violence
+  - Illegal activities
+  - Adult content (inappropriate context)
+- **Jailbreak prevention:** Can't trick Copilot into violating policies
+
+#### User Responsibilities
+
+**Verify Information:**
+- Don't blindly trust Copilot outputs
+- Check sources provided
+- Validate critical information
+- Use judgment
+
+**Protect Sensitive Data:**
+- Don't share credentials in prompts
+- Be cautious with highly sensitive data
+- Understand Copilot respects permissions but still review
+
+**Provide Feedback:**
+- Thumbs up/down on responses
+- Report inappropriate content
+- Suggest improvements
+
+**Follow Policies:**
+- Respect organization's acceptable use policies
+- Don't use for prohibited purposes
+- Comply with legal/regulatory requirements
+
+#### Admin Responsibilities
+
+**Prepare Environment:**
+- Clean up oversharing before Copilot deployment
+- Apply sensitivity labels to sensitive data
+- Configure DLP policies
+- Enable audit logging
+
+**Monitor Usage:**
+- Review Copilot Dashboard
+- Investigate policy violations
+- Track adoption and value
+
+**Govern Access:**
+- Assign licenses thoughtfully
+- Configure Conditional Access
+- Control plugin usage
+- Manage web grounding setting
+
+**Educate Users:**
+- Provide responsible AI training
+- Set expectations
+- Communicate policies
+- Share best practices
+
+#### Reporting Issues
+
+**If Copilot Produces Problematic Content:**
+
+1. **Provide Feedback:**
+   - Thumbs down on response
+   - Select reason (inaccurate, inappropriate, etc.)
+
+2. **Report to Admin:**
+   - If violates company policy
+   - If potentially harmful
+
+3. **Microsoft Support:**
+   - For serious issues
+   - Product bugs
+   - Security concerns
+
+**Admin Reporting:**
+- Microsoft Purview: If compliance issue
+- Microsoft Support: Technical issues
+- FastTrack: Deployment guidance
+
+#### Generative AI Limitations
+
+**Copilot May:**
+- **Hallucinate:** Generate plausible but incorrect information
+- **Misunderstand:** Misinterpret vague prompts
+- **Lack context:** Not understand nuanced situations
+- **Have outdated info:** Based on training data cutoff
+
+**Mitigation:**
+- Always verify critical information
+- Provide clear, specific prompts
+- Review and edit outputs
+- Use judgment
+
+**Best Practices:**
+- **Good Prompt:** "Summarize the Q4 2024 financial report focusing on revenue and expenses"
+- **Bad Prompt:** "What happened financially?" (too vague)
+
+#### Ethical Use Cases
+
+**Appropriate Uses:**
+- Summarize documents
+- Draft emails, reports
+- Analyze data
+- Generate ideas
+- Answer questions about organizational data
+
+**Inappropriate Uses:**
+- Make legal decisions without review
+- Generate medical diagnoses
+- Replace human judgment on critical matters
+- Circumvent security controls
+- Harass or harm others
+
+#### Continuous Improvement
+
+**Microsoft's Commitment:**
+- Regular updates to address issues
+- Red team testing (adversarial testing)
+- Bug bounty program
+- Transparent disclosure of limitations
+
+**Feedback Loop:**
+```
+User feedback → Microsoft analyzes → Model improvements → Better responses
+```
+
+**Hands-On (Conceptual):**
+1. Review Microsoft's AI principles: https://www.microsoft.com/en-us/ai/responsible-ai
+2. Test Copilot transparency:
+   - Ask factual question
+   - Note how Copilot cites sources
+   - Click source links
+3. Test limitations:
+   - Ask about something you don't have access to
+   - Copilot should say "no access"
+4. Provide feedback:
+   - Get a response from Copilot
+   - Click thumbs up/down
+   - See how feedback is used to improve
+
+**Key Takeaways:**
+- Responsible AI is foundational to Copilot
+- Privacy and security built-in
+- Transparency through source citation
+- Human oversight essential
+- Shared responsibility (Microsoft, admins, users)
+
+**Documentation:** https://www.microsoft.com/en-us/ai/responsible-ai
+
+---
+
+
+## Section 2.3: Identify Data Protection and Governance Risks for Microsoft 365 and Copilot
+
+### Skill: Identify compliance risks and recommendations by using Microsoft Purview Compliance Manager
+
+**What You Need to Know:**
+- Compliance Manager assesses compliance posture
+- Provides risk identification and remediation guidance
+- Tracks progress toward compliance
+
+**Key Concepts:**
+
+#### What is Compliance Manager?
+
+**Purpose:** Help organizations understand and improve compliance posture
+
+**Location:** Purview Compliance Portal → Compliance Manager
+
+**Core Capabilities:**
+- **Risk assessment:** Identify compliance gaps
+- **Improvement actions:** Step-by-step remediation
+- **Compliance score:** Numerical measure of posture
+- **Templates:** 360+ regulations/standards
+- **Continuous monitoring:** Real-time compliance status
+
+#### Compliance Score
+
+**What It Is:**
+- Percentage representing your compliance posture
+- Based on completing improvement actions
+- Ranges from 0-100%
+
+**Calculation:**
+- Points awarded for completing actions
+- Points possible = all actions
+- Score = (Points achieved / Points possible) × 100
+
+**Example:**
+- Total possible points: 500
+- Points achieved: 350
+- Compliance Score: 70%
+
+**Categories:**
+- **Microsoft-managed:** Actions Microsoft handles (e.g., data center security)
+- **Your managed:** Actions you implement (e.g., MFA, DLP)
+- **Shared:** Both Microsoft and you contribute
+
+#### Identifying Risks
+
+**Compliance Manager Shows:**
+
+**1. Uncompleted Controls:**
+- Required controls not implemented
+- Indicates compliance gaps
+- **Risk:** Failing audit, regulatory penalty
+
+**2. Failing Assessments:**
+- Assessment shows "Not Compliant"
+- Specific requirements not met
+- **Risk:** Non-compliance with regulation
+
+**3. Low Compliance Score:**
+- Below industry benchmark
+- More gaps than peers
+- **Risk:** Overall weak posture
+
+**4. Critical Improvement Actions:**
+- High-impact actions not started
+- Examples: No MFA, no DLP
+- **Risk:** Serious vulnerabilities
+
+#### Assessments
+
+**What They Are:**
+- Grouping of controls for a regulation
+- Pre-built templates available
+- Custom assessments possible
+
+**Common Templates:**
+- **GDPR:** EU data protection
+- **ISO 27001:** Information security
+- **HIPAA:** Healthcare data
+- **SOX:** Financial reporting
+- **NIST:** Cybersecurity framework
+- **CMMC:** Defense contractors
+
+**Creating Assessment:**
+1. Compliance Manager → Assessments → Add assessment
+2. Select template (e.g., GDPR)
+3. Name assessment
+4. Create
+5. Review controls and actions
+
+#### Improvement Actions
+
+**Structure:**
+- **Title:** What to do
+- **Category:** Prevent, Detect, Correct, etc.
+- **Points:** Value of completing
+- **Status:** Not assessed, Not started, In progress, Completed
+- **Test status:** Passed, Failed, Not assessed
+- **Solutions:** Where to configure (links to settings)
+- **Implementation:** Step-by-step instructions
+
+**Example Action:**
+```
+Title: Enable multi-factor authentication
+Category: Access Control
+Points: 27
+Implementation:
+  1. Navigate to Entra Admin → Security → MFA
+  2. Enable MFA for all users
+  3. Configure trusted IPs
+  4. Test with pilot users
+  5. Roll out organization-wide
+Test: Verify MFA enforced for sample users
+```
+
+**Assigning Actions:**
+- Assign to team members
+- Track progress
+- Document completion
+
+#### Using Compliance Manager to Identify Risks
+
+**Step 1: Review Compliance Score**
+- Navigate to Compliance Manager → Overview
+- Check current score
+- Compare to: Previous months, Industry average
+
+**Low Score = High Risk**
+
+**Step 2: Review Assessments**
+- Assessments tab
+- Select assessment (e.g., GDPR)
+- View compliance status
+- **Red/Yellow indicators = Risks**
+
+**Step 3: Filter Improvement Actions**
+- Filter: Status = Not started
+- Sort: Points (descending) - shows high-impact gaps
+- **These are your biggest risks**
+
+**Step 4: Prioritize Risks**
+- **High points + Not started = Critical risk**
+- **Low points + Completed = Low risk**
+- Focus on: High-impact, not started
+
+**Step 5: Review Specific Risks**
+
+Click improvement action to see:
+- **Threats addressed:** What attacks this prevents
+- **Affected standards:** Which regulations require this
+- **Related controls:** Dependencies
+
+#### Common Compliance Risks Identified
+
+**Risk 1: No Multi-Factor Authentication**
+- **Compliance Manager shows:** "Enable MFA" not completed
+- **Risk:** Account takeover, data breach
+- **Regulations:** NIST, ISO 27001, CMMC, GDPR
+- **Points:** 27 (high impact)
+- **Remediation:** Enable MFA via Conditional Access
+
+**Risk 2: No Data Loss Prevention**
+- **Compliance Manager shows:** "Implement DLP" not started
+- **Risk:** Data leakage, GDPR violations
+- **Regulations:** GDPR, HIPAA, PCI-DSS
+- **Points:** 20
+- **Remediation:** Create DLP policies in Purview
+
+**Risk 3: Insufficient Access Reviews**
+- **Compliance Manager shows:** "Conduct access reviews" failing
+- **Risk:** Excessive permissions, insider threats
+- **Regulations:** SOX, HIPAA
+- **Points:** 15
+- **Remediation:** Configure access reviews in Entra ID
+
+**Risk 4: No Encryption for Sensitive Data**
+- **Compliance Manager shows:** "Encrypt sensitive data" not implemented
+- **Risk:** Data exposure if stolen
+- **Regulations:** HIPAA, PCI-DSS
+- **Points:** 25
+- **Remediation:** Apply sensitivity labels with encryption
+
+#### Recommendations from Compliance Manager
+
+**Compliance Manager Provides:**
+
+**1. Step-by-Step Guidance:**
+- How to implement control
+- Links to admin portals
+- Configuration steps
+
+**2. Testing Procedures:**
+- How to verify implementation
+- Sample test cases
+
+**3. Documentation:**
+- What to document
+- Evidence for auditors
+
+**4. Related Resources:**
+- Microsoft Learn articles
+- Best practice guides
+
+#### Tracking Progress
+
+**Status Updates:**
+- Mark actions: Not started → In progress → Completed
+- Attach evidence (screenshots, policies)
+- Set implementation date
+- Notes on approach
+
+**Score Improvement:**
+- As you complete actions, score increases
+- Track trend over time
+- Report to management
+
+**Reporting:**
+- Export compliance report
+- Share with auditors
+- Present to leadership
+
+#### Copilot and Compliance Manager
+
+**Copilot-Related Risks:**
+- "Implement data governance for AI" action
+- "Enable audit logging for Copilot"
+- "Configure DLP for AI interactions"
+- "Apply sensitivity labels to Copilot-accessible data"
+
+**Before Copilot Deployment:**
+- Run Compliance Manager assessment
+- Address critical gaps
+- Ensure baseline compliance
+- Document readiness
+
+#### Hands-On:**
+1. Navigate to Purview → Compliance Manager
+2. View compliance score (Overview)
+3. Check improvement actions:
+   - Filter: Status = Not started
+   - Sort: Points (descending)
+4. Click high-point action:
+   - Review implementation steps
+   - Check threats addressed
+   - Note affected regulations
+5. Create assessment:
+   - Assessments → Add assessment
+   - Template: GDPR or ISO 27001
+   - Review controls
+6. Assign action to yourself:
+   - Select action → Assign
+   - Update status: In progress
+7. Export report (for management presentation)
+
+**Best Practices:**
+- **Regular Reviews:** Monthly score check
+- **Prioritize:** High-impact actions first
+- **Document:** Attach evidence to actions
+- **Communicate:** Share progress with leadership
+- **Continuous:** Compliance is ongoing, not one-time
+
+**Key Takeaways:**
+- Compliance Manager = Risk identification tool
+- Low score = High risk
+- Improvement actions = Remediation roadmap
+- Use before Copilot deployment
+- Continuous monitoring essential
+
+**Documentation:** https://learn.microsoft.com/en-us/purview/compliance-manager
+
+---
+
+### Skill: Identify sensitive information by using Microsoft Purview Data Explorer
+
+**What You Need to Know:**
+- Data Explorer (Content Explorer) shows where sensitive data is
+- Critical for risk assessment and data protection
+- Visualizes labeled and classified content
+
+**Key Concepts:**
+
+#### What is Content Explorer?
+
+**Purpose:** Discover and visualize sensitive data across M365
+
+**Location:** Purview → Data classification → Content Explorer
+
+**What It Shows:**
+- All items with sensitivity labels
+- All items containing sensitive information types (SITs)
+- Location (SharePoint, OneDrive, Exchange)
+- Owner, last modified date
+- Current label applied
+
+#### Using Content Explorer to Identify Sensitive Information
+
+**View by Sensitivity Label:**
+1. Content Explorer → Filter: Sensitivity label
+2. Select label (e.g., "Confidential")
+3. See all files with that label
+4. **Risk Identification:**
+   - Are highly sensitive files in low-security sites?
+   - Are files properly protected (encrypted)?
+   - Who has access?
+
+**View by Sensitive Information Type:**
+1. Content Explorer → Filter: Sensitive info type
+2. Select SIT (e.g., "Credit Card Number")
+3. See all content containing credit cards
+4. **Risk Identification:**
+   - Credit cards in unlabeled files
+   - PII in public SharePoint sites
+   - Sensitive data without DLP protection
+
+**View by Location:**
+1. Filter: Location = SharePoint sites
+2. See distribution of sensitive data
+3. **Risk Identification:**
+   - Concentrations of sensitive data
+   - Overshared sites with sensitive content
+   - Abandoned sites still containing data
+
+**View by Owner:**
+1. Filter: Owner = Specific user
+2. See what sensitive data they have
+3. **Risk Identification:**
+   - Departing employees with sensitive data
+   - Excessive data hoarding
+   - Unauthorized data possession
+
+#### Common Risk Scenarios
+
+**Scenario 1: Unprotected Credit Card Numbers**
+
+**Steps:**
+1. Content Explorer → Sensitive info types → Credit Card Number
+2. Review results
+3. **Risks found:**
+   - 50 files with credit cards
+   - Only 10 have sensitivity labels
+   - 40 unprotected!
+4. **Action:**
+   - Apply "Confidential" label to 40 files
+   - Create auto-labeling policy
+   - Implement DLP to block sharing
+
+**Scenario 2: Confidential Data in Public Sites**
+
+**Steps:**
+1. Content Explorer → Sensitivity label → Highly Confidential
+2. Filter: Location
+3. **Risk found:**
+   - Highly Confidential files in "Company Wide" site
+   - Everyone can access!
+4. **Action:**
+   - Move files to restricted site
+   - Or remove excessive permissions
+   - Audit who accessed
+
+**Scenario 3: Departing Employee Data**
+
+**Steps:**
+1. Employee announces resignation
+2. Content Explorer → Owner = Departing employee
+3. **Risks found:**
+   - 500 files with customer data
+   - 100 labeled "Confidential"
+   - Access needs to be transferred
+4. **Action:**
+   - Transfer ownership to manager
+   - Review for data theft indicators
+   - Apply retention hold
+
+**Scenario 4: Unlabeled Sensitive Data (Copilot Risk)**
+
+**Steps:**
+1. Before Copilot deployment
+2. Content Explorer → All locations
+3. Filter: Items WITHOUT sensitivity labels
+4. Search for known sensitive locations (Finance, HR)
+5. **Risk:**
+   - Unlabeled sensitive data
+   - Copilot could surface to unauthorized users
+6. **Action:**
+   - Apply labels before Copilot rollout
+   - Use auto-labeling
+
+#### Content Explorer Capabilities
+
+**Filtering:**
+- Sensitivity label (or no label)
+- Sensitive info type
+- Retention label
+- Location (SharePoint, OneDrive, Exchange)
+- Date range
+- Owner
+
+**Exporting:**
+- Export results to CSV
+- Further analysis in Excel
+- Share with stakeholders
+
+**Limitations:**
+- Requires permissions (Content Explorer Viewer role)
+- Data may be delayed (not real-time)
+- Only shows indexed content
+
+#### Risk Indicators in Content Explorer
+
+**Red Flags:**
+1. **High volume of unlabeled sensitive data**
+   - Gap in classification
+   - Risk: Unprotected data
+
+2. **Sensitive data in unexpected locations**
+   - HR data in Sales site
+   - Risk: Unauthorized access
+
+3. **Old sensitive data**
+   - Files from 5+ years ago
+   - Risk: Outdated retention, compliance issues
+
+4. **Concentration with single user**
+   - One user owns 80% of sensitive data
+   - Risk: Single point of failure, potential hoarding
+
+5. **Sensitive data with public/external sharing**
+   - "Anyone" links on confidential files
+   - Risk: Data exposure
+
+#### Complementary Tools
+
+**Activity Explorer:**
+- Shows labeling activities
+- Who applied/changed labels
+- When and where
+
+**Combine with Content Explorer:**
+1. Content Explorer: Find unlabeled files
+2. Activity Explorer: See if labels were removed (suspicious)
+
+**Data Loss Prevention Reports:**
+- DLP policy matches
+- Sensitive data being shared
+
+**Combine with Content Explorer:**
+1. Content Explorer: Find files with SITs
+2. DLP Reports: See if attempted sharing blocked
+
+#### Permissions Required
+
+**To View Content Explorer:**
+- Content Explorer Viewer role (minimum)
+- Or: Content Explorer Content Viewer (see file content)
+- Or: Information Protection Admin (full access)
+
+**Assigning Roles:**
+1. Purview → Permissions → Roles
+2. Select role group
+3. Add members
+
+#### Best Practices
+
+**Regular Reviews:**
+- Weekly: Check for new sensitive data
+- Monthly: Review unlabeled content
+- Quarterly: Audit label usage
+
+**Before Copilot:**
+- Run comprehensive Content Explorer report
+- Identify all unlabeled sensitive data
+- Apply labels before Copilot deployment
+
+**Risk Prioritization:**
+1. Unprotected PII (SSN, credit cards)
+2. Unlabeled confidential business data
+3. Old sensitive data (retention risk)
+4. Overshared sensitive sites
+
+**Remediation:**
+- Apply labels (manual or auto)
+- Move data to secure locations
+- Remove excessive sharing
+- Implement DLP
+
+**Hands-On:**
+1. Navigate to Purview → Data classification → Content Explorer
+2. Explore by sensitive info type:
+   - Select "Email Address"
+   - Review files containing emails
+   - Note locations and labels
+3. Explore by sensitivity label:
+   - Select "Confidential"
+   - See all confidential files
+   - Check if properly secured
+4. Filter by location:
+   - Location: SharePoint
+   - Identify sites with most sensitive data
+5. Export results:
+   - Export → CSV
+   - Open in Excel
+   - Analyze distribution
+6. Identify risks:
+   - Unlabeled files with SITs
+   - Labeled files in public locations
+   - Abandoned data
+
+**Key Takeaways:**
+- Content Explorer = "Where is my sensitive data?"
+- Critical for risk assessment
+- Must-use before Copilot deployment
+- Guides label application and DLP policies
+- Regular monitoring essential
+
+**Documentation:** https://learn.microsoft.com/en-us/purview/data-classification-content-explorer
+
+---
+
+
+### Skill: Identify risks by using Insider Risk Management
+
+**What You Need to Know:**
+- Insider Risk Management detects risky user behavior
+- Uses ML and signals to identify potential threats
+- Privacy-preserving (pseudonymized)
+
+**Key Concepts:**
+
+#### What is Insider Risk Management?
+
+**Purpose:** Detect and mitigate insider threats (malicious or negligent)
+
+**Location:** Purview → Insider Risk Management
+
+**Detects:**
+- Data theft by departing employees
+- General data leaks
+- Security policy violations
+- Patient data misuse (healthcare)
+- Risky browsing behavior
+- Offensive language
+
+**How It Works:**
+1. Define policies (what to detect)
+2. Specify indicators (triggering events)
+3. Monitor user activities (pseudonymized)
+4. ML assigns risk scores
+5. Generate alerts for high-risk users
+6. Investigate in private workspace
+7. Take remediation action
+
+#### Identifying Risks with Insider Risk Management
+
+**Risk Indicators:**
+
+**Data Exfiltration:**
+- Copying files to USB drives
+- Uploading to personal cloud storage
+- Emailing data to personal account
+- Printing excessive documents
+- Downloading bulk data
+
+**Departing Employee:**
+- Near resignation/termination date
+- Accessing files outside normal pattern
+- After-hours data access
+- Removing data from systems
+
+**Security Violations:**
+- Bypassing security controls
+- Using unauthorized apps
+- Sharing credentials
+- Accessing prohibited sites
+
+**Excessive Access:**
+- Accessing more data than job requires
+- Unusual file activity
+- Access to unrelated departments
+
+#### Insider Risk Policies
+
+**Pre-built Policy Templates:**
+
+**1. Data theft by departing users**
+- Triggers: HR connector (resignation date set)
+- Monitors: Unusual file access, downloads, USB usage
+- Risk window: 30 days before/after departure
+
+**2. General data leaks**
+- Triggers: Always monitoring
+- Monitors: Sharing to personal email, cloud uploads
+- Indicators: External sharing, risky domains
+
+**3. Data leaks by priority users**
+- Scope: Executives, admins, sensitive roles
+- Monitors: Same as general leaks
+- Higher sensitivity
+
+**4. Data leaks by disgruntled users**
+- Triggers: Performance review, demotion
+- Monitors: Retaliatory data theft
+- Integration with HR systems
+
+**5. Security policy violations**
+- Monitors: Policy bypass attempts
+- Indicators: Unauthorized apps, risky sites
+- Compliance violations
+
+**6. Patient data misuse (Healthcare)**
+- Monitors: Access to patient records
+- Indicators: Excessive access, unrelated patient access
+- HIPAA-specific
+
+#### Risk Scoring
+
+**Score Calculation:**
+- ML model analyzes indicators
+- Assigns risk score (0-100)
+- Thresholds trigger alerts:
+  - Low risk: 0-30
+  - Medium risk: 31-70
+  - High risk: 71-100
+
+**Factors Affecting Score:**
+- Frequency of risky actions
+- Severity of indicators
+- Historical patterns (baseline)
+- Peer comparison
+
+**Example:**
+- User downloads 500 files (unusual)
+- To USB drive (exfiltration indicator)
+- After hours (suspicious timing)
+- Week before resignation (triggering event)
+- **Risk Score:** 95 (High risk!)
+
+#### Alerts and Cases
+
+**Alert Generated:**
+- When risk score exceeds threshold
+- Sent to designated reviewers
+- Pseudonymized initially (username hidden)
+
+**Creating Case:**
+1. Reviewer sees alert
+2. De-pseudonymizes if necessary (requires permission)
+3. Creates case for investigation
+4. Gathers evidence
+5. Determines: False positive, coaching needed, or serious threat
+
+**Case Management:**
+- Assign to investigators
+- Collect additional data
+- Document findings
+- Escalate if needed
+- Close with resolution
+
+#### Privacy Features
+
+**Pseudonymization:**
+- Usernames initially hidden (User1, User2)
+- Protects privacy during initial review
+- Only de-pseudonymize if legitimate concern
+
+**Role-Based Access:**
+- Analysts: See pseudonymized alerts
+- Investigators: Can de-pseudonymize
+- Admins: Full access
+
+**Audit Trail:**
+- All actions logged
+- Who de-pseudonymized what user
+- Case activities tracked
+
+#### Risk Scenarios
+
+**Scenario 1: Departing Employee Data Theft**
+
+**Indicators:**
+- Employee submits resignation
+- HR connector triggers policy
+- Next day: Downloads 200 files
+- Emails 50 files to personal Gmail
+- USB transfers detected
+
+**Insider Risk Action:**
+- Alert generated (High risk: 92)
+- Investigator creates case
+- Reviews files accessed (finance data, customer lists)
+- **Risk:** Data theft before departure
+- **Action:** Revoke access immediately, involve legal
+
+**Scenario 2: Excessive Patient Record Access**
+
+**Indicators:**
+- Nurse accesses 100 patient records
+- Only 5 are assigned to nurse
+- 95 are unrelated patients
+- Pattern repeats weekly
+
+**Insider Risk Action:**
+- Alert generated (Medium risk: 65)
+- Investigation reveals: Nurse checking records of celebrities
+- **Risk:** HIPAA violation, privacy breach
+- **Action:** Coaching, restrict access, retrain
+
+**Scenario 3: Disgruntled Employee**
+
+**Indicators:**
+- Employee received negative review
+- Next week: Uploads files to Dropbox
+- Prints confidential documents
+- Searches for "how to delete audit logs"
+
+**Insider Risk Action:**
+- Alert generated (High risk: 88)
+- Case created
+- **Risk:** Retaliatory data leak
+- **Action:** Immediate meeting, limit access, monitor closely
+
+#### Integration with Adaptive DLP
+
+**How It Works:**
+- Insider Risk assigns user risk level
+- Adaptive DLP uses risk level for policy enforcement
+- High-risk users → Stricter DLP
+
+**Example:**
+- Normal user: Can share confidential files internally
+- High-risk user: Blocked from all sharing
+
+**Configuration:**
+1. Enable Adaptive Protection in DLP
+2. DLP policies reference Insider Risk levels
+3. Automatic enforcement based on risk
+
+#### Insider Risk for Copilot
+
+**Copilot-Specific Risks:**
+- Excessive Copilot prompts requesting sensitive data
+- Attempts to use Copilot to bypass DLP
+- Bulk data extraction via Copilot
+- Asking Copilot for restricted information
+
+**Monitoring:**
+- Copilot interactions logged
+- Insider Risk analyzes patterns
+- Unusual Copilot usage flagged
+
+**Example:**
+- User asks Copilot 100 questions about financial data
+- All in one day (unusual)
+- **Risk:** Data harvesting via Copilot
+- **Alert:** Investigator reviews
+
+#### Hands-On:**
+1. Navigate to Purview → Insider Risk Management
+2. Check if enabled (may need license/setup)
+3. Policies → Review pre-built templates
+4. Understand policy components:
+   - Triggering events
+   - Indicators monitored
+   - Users in scope
+5. Alerts (if any exist):
+   - View pseudonymized alerts
+   - Note risk scores
+6. Conceptual understanding:
+   - How would you detect departing employee risk?
+   - What indicators would you monitor?
+
+**Best Practices:**
+
+**Implementation:**
+- Start with "Data theft by departing users" policy
+- Integrate with HR system
+- Pilot with IT department
+- Gradually expand
+
+**Privacy:**
+- Minimize reviewers with de-pseudonymization
+- Audit all de-pseudonymization actions
+- Clear policies on when to investigate
+
+**Response:**
+- Document escalation procedures
+- Coordinate with Legal, HR, Security
+- Consistent response (not ad-hoc)
+
+**False Positives:**
+- Tune policies over time
+- Adjust thresholds
+- Whitelist legitimate behaviors
+
+**Key Takeaways:**
+- Insider Risk = Detect risky user behavior
+- ML-powered risk scoring
+- Privacy-preserving pseudonymization
+- Critical for Copilot (monitor unusual AI usage)
+- Integrates with Adaptive DLP
+
+**Documentation:** https://learn.microsoft.com/en-us/purview/insider-risk-management
+
+---
+
+### Skill: Identify and respond to alerts generated by Microsoft Purview DLP
+
+**What You Need to Know:**
+- DLP generates alerts when policies match
+- Alerts require investigation and response
+- Proper alert management reduces risk
+
+**Key Concepts:**
+
+#### DLP Alert Generation
+
+**When Alerts Generated:**
+- DLP policy detects sensitive information
+- Action configured: "Send incident report"
+- Severity: Low, Medium, High
+- Alert sent to: Admins, designated reviewers
+
+**Alert Contents:**
+- Policy name that matched
+- Sensitive info type detected
+- Location (file, email, chat)
+- User who triggered
+- Date/time
+- Severity level
+
+#### Viewing DLP Alerts
+
+**Location:** Purview → Data Loss Prevention → Alerts
+
+**Alert Dashboard:**
+- All active alerts
+- Filter by: Severity, Policy, User, Date
+- Sort by: Most recent, Highest severity
+
+**Alert Details:**
+- Click alert to see:
+  - Matched content (sensitive info redacted)
+  - Policy rule that triggered
+  - User action (shared, emailed, downloaded)
+  - Recommended actions
+
+#### Alert Severity Levels
+
+**Low Severity:**
+- Minor policy violations
+- Single sensitive item
+- Internal sharing only
+- **Example:** Email with 1 credit card to colleague
+
+**Medium Severity:**
+- Moderate violations
+- Multiple sensitive items
+- Potential risk
+- **Example:** SharePoint file with 10 SSNs shared with team
+
+**High Severity:**
+- Serious violations
+- Bulk sensitive data
+- External sharing
+- **Example:** Email with customer database to external domain
+
+#### Investigating Alerts
+
+**Investigation Steps:**
+
+1. **Review Alert:**
+   - Read policy name
+   - Check sensitive info type
+   - Note location and user
+
+2. **Assess Context:**
+   - Is user authorized to access this data?
+   - Is sharing legitimate business need?
+   - Was it accidental or intentional?
+
+3. **Check User History:**
+   - Activity Explorer: Other DLP violations?
+   - Pattern of violations or one-off?
+   - Insider Risk: Is user flagged?
+
+4. **Verify Content:**
+   - What data was involved?
+   - How sensitive? (public, internal, confidential)
+   - Actual impact if exposed?
+
+5. **Determine Response:**
+   - False positive? (dismiss)
+   - User education needed? (notify user)
+   - Policy violation? (escalate)
+   - Data breach? (incident response)
+
+#### Response Actions
+
+**Dismiss Alert:**
+- False positive (data not actually sensitive)
+- Authorized exception
+- No risk identified
+- **Document reason**
+
+**Notify User:**
+- Explain violation
+- Provide policy guidance
+- Request remediation
+- Log interaction
+
+**Override Block:**
+- User requests override with justification
+- Review justification
+- Approve or deny
+- Log decision
+
+**Escalate:**
+- Serious violation
+- Potential data breach
+- Involve: Security team, Legal, Management
+- Create incident ticket
+
+**Remediate:**
+- Remove inappropriate sharing
+- Recall email (if possible)
+- Revoke access to file
+- Apply stronger protection (label)
+
+#### Common Alert Scenarios
+
+**Scenario 1: Credit Card in Email**
+
+**Alert:**
+- Policy: "Block credit card sharing externally"
+- Severity: High
+- User: sales@contoso.com
+- Action: Sent email to customer@vendor.com
+- Content: Invoice with credit card number
+
+**Investigation:**
+- Legitimate business? NO (should use secure portal)
+- First time? YES
+
+**Response:**
+- Block email (already blocked by DLP)
+- Notify user: "Don't send credit cards via email"
+- Provide alternative: Secure payment link
+- Close alert: Resolved with user education
+
+**Scenario 2: Bulk SSN Download**
+
+**Alert:**
+- Policy: "Protect SSNs"
+- Severity: High
+- User: hr-manager@contoso.com
+- Action: Downloaded Excel file with 500 SSNs to personal device
+
+**Investigation:**
+- Authorized? HR manager can access
+- Business need? Preparing for audit
+- Approved download? Not documented
+
+**Response:**
+- Contact HR manager
+- Verify legitimate need
+- Request secure handling
+- Apply sensitivity label to file
+- Document approval
+- Close alert: Authorized with documentation
+
+**Scenario 3: Copilot DLP Alert**
+
+**Alert:**
+- Policy: "DLP for Copilot"
+- Severity: Medium
+- User: marketing@contoso.com
+- Action: Copilot prompt contained SSNs
+
+**Investigation:**
+- User asked Copilot to "summarize employee data"
+- Copilot response would include SSNs
+- DLP blocked response
+
+**Response:**
+- Notify user: Don't request PII via Copilot
+- Train on Copilot acceptable use
+- Review if user should have access to employee data
+- Close alert: User educated
+
+#### Alert Management Best Practices
+
+**Triage:**
+- Review alerts daily (at minimum)
+- Prioritize: High severity first
+- Batch similar alerts
+
+**SLA:**
+- High severity: Respond within 4 hours
+- Medium: Within 24 hours
+- Low: Within 48 hours
+
+**Documentation:**
+- Log all responses
+- Note justifications
+- Track trends
+
+**Tuning:**
+- Many false positives? Adjust policy
+- Missing violations? Strengthen policy
+- Review policy effectiveness monthly
+
+**Automation:**
+- Auto-dismiss known false positives
+- Auto-escalate high-severity to SOC
+- Alert aggregation (reduce noise)
+
+#### DLP Reports
+
+**Available Reports:**
+- **Policy Matches:** How many detections
+- **False Positives:** Rate over time
+- **Top Users:** Most violations
+- **Top Policies:** Most triggered
+
+**Using Reports:**
+1. Identify problem areas
+2. Adjust policies
+3. Target user training
+4. Report to management
+
+#### Integration with Other Tools
+
+**Insider Risk Management:**
+- DLP violations feed into Insider Risk
+- Pattern of violations increases risk score
+- Coordinated investigation
+
+**Adaptive DLP:**
+- High-risk users (from Insider Risk)
+- Get stricter DLP enforcement
+- Automatic escalation
+
+**SIEM Integration:**
+- Export DLP alerts to SIEM (Sentinel, Splunk)
+- Correlate with other security events
+- Automated response workflows
+
+#### Copilot-Specific DLP Alerts
+
+**Monitoring Copilot:**
+- DLP scans Copilot prompts and responses
+- Detects sensitive data in AI interactions
+- Alerts when Copilot would expose protected data
+
+**Alert Example:**
+```
+Policy: DLP for Microsoft 365 Copilot
+Alert: User attempted to extract customer emails via Copilot
+Action: Copilot response blocked
+User: sales@contoso.com
+Prompt: "Give me list of all customer email addresses"
+Detection: 100+ email addresses (SIT: Email Address)
+Response: BLOCKED
+```
+
+**Response:**
+- Educate user on Copilot appropriate use
+- Review if user needs that data access
+- Check for pattern (data harvesting attempt?)
+
+#### Hands-On:**
+1. Navigate to Purview → Data Loss Prevention → Alerts
+2. Review active alerts (if any)
+3. Click alert to see details:
+   - Policy matched
+   - Sensitive info detected
+   - User and action
+4. Practice investigation:
+   - Is this false positive?
+   - Legitimate business need?
+   - Policy violation?
+5. Document response:
+   - Action taken
+   - Reason
+   - Follow-up needed?
+6. Close or escalate alert
+7. Review DLP reports:
+   - Reports → DLP policy matches
+   - Identify trends
+
+**Best Practices:**
+- **Respond promptly:** Don't let alerts pile up
+- **Investigate thoroughly:** Understand context
+- **Document decisions:** Audit trail important
+- **Educate users:** Turn violations into learning
+- **Tune policies:** Reduce false positives
+- **Escalate appropriately:** Serious violations to security team
+
+**Key Takeaways:**
+- DLP alerts = Policy violations detected
+- Investigation required (not auto-dismiss)
+- Response: Dismiss, educate, remediate, or escalate
+- Copilot interactions monitored by DLP
+- Alert management is ongoing process
+
+**Documentation:** https://learn.microsoft.com/en-us/purview/dlp-alerts-dashboard
+
+---
+
